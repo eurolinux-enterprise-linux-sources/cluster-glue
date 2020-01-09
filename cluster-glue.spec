@@ -4,7 +4,7 @@
 
 # When downloading directly from Mercurial, it will automatically add this prefix
 # Invoking 'hg archive' wont but you can add one with: hg archive -t tgz -p "Reusable-Cluster-Components-" -r $upstreamversion $upstreamversion.tar.gz
-%global specversion 2
+%global specversion 6
 %global upstreamprefix Reusable-Cluster-Components-
 %global upstreamversion 1448deafdf79
 
@@ -20,6 +20,9 @@ Url:		http://linux-ha.org/wiki/Cluster_Glue
 Group:		System Environment/Base
 Source0:	http://hg.linux-ha.org/glue/archive/%{upstreamversion}.tar.bz2
 Source1:	lrmadmin.8
+Patch1:		lrmd-max-children.patch
+Patch2:		lrmd-cancel-repeating-op.patch
+Patch3:		rhbz-805147-multilib-conflict-fix.patch	
 Requires:	perl-TimeDate
 Requires:       cluster-glue-libs = %{version}-%{release}
 
@@ -53,6 +56,9 @@ BuildRequires: libxslt docbook-style-xsl
 
 %prep
 %setup -q -n %{upstreamprefix}%{upstreamversion}
+%patch1 -p1
+%patch2 -p1
+%patch3 -p0
 
 ./autogen.sh
 
@@ -192,6 +198,18 @@ such as Pacemaker.
 %doc COPYING.LIB
 
 %changelog
+
+* Fri Mar 30 2012 David Vossel <dvossel@redhat.com> 1.0.5-6
+- Fixes multilib conflicts in devel package.
+  Resolves: rhbz#805147
+
+* Mon Mar 26 2012 David Vossel <dvossel@redhat.com> 1.0.5-4
+- Fixes issue with cancelled reoccurring operations never being removed from lrmd.
+  Resolves: rhbz#786746
+
+* Thu Feb 02 2012 Andrew Beekhof <andrew@beekhof.net> 1.0.5-3
+- Ensure the value of LRMD_MAX_CHILDREN environment variable is honored
+  Resolves: rhbz#758127
 
 * Tue May 25 2010 Andrew Beekhof <andrew@beekhof.net> 1.0.5-2
 - Fix provides/requires for sub packages to avoid version issues
